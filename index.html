@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>존기존자 — 인터랙티브 교재</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1A1A2E;
+            color: #E0E0E0;
+            line-height: 1.7;
+        }
+        header {
+            background: linear-gradient(135deg, #1A1A2E 0%, #16213E 100%);
+            border-bottom: 3px solid #E94560;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2.4rem;
+            color: #FFFFFF;
+            margin-bottom: 0.8rem;
+        }
+        header h1 span { color: #E94560; }
+        blockquote {
+            font-style: italic;
+            color: #A0A0B8;
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+        .intro {
+            text-align: center;
+            padding: 2rem;
+            color: #C0C0D0;
+            font-size: 1.05rem;
+        }
+        main { max-width: 800px; margin: 0 auto; padding: 0 2rem 3rem; }
+        h2 {
+            color: #E94560;
+            font-size: 1.5rem;
+            margin: 2.5rem 0 1rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid #2A2A4E;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th {
+            background: #E94560;
+            color: #FFFFFF;
+            padding: 0.6rem 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        td {
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid #2A2A4E;
+        }
+        tr:hover td { background: rgba(233, 69, 96, 0.08); }
+        code {
+            background: #2A2A4E;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.95rem;
+        }
+        ul { list-style: none; margin: 1rem 0; }
+        ul li {
+            padding: 0.8rem 1rem;
+            margin: 0.4rem 0;
+            background: #16213E;
+            border-left: 3px solid #E94560;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        ul li:hover { background: #1C2A45; }
+        ul li a {
+            color: #FFFFFF;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        ul li a:hover { color: #E94560; }
+        footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid #2A2A4E;
+            margin-top: 2rem;
+        }
+        footer a {
+            color: #E94560;
+            text-decoration: none;
+            margin: 0 1rem;
+            font-weight: 500;
+        }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><span>존기존자</span> — 인터랙티브 교재</h1>
+        <blockquote>"자연이 먼저다. 법칙은 불변이다. 수학은 표현일 뿐이다."</blockquote>
+    </header>
+
+    <p class="intro">TU-Berlin 공학박사, 21년 교수 경력의 존기존자가 만드는 전기전자공학 교육 자료.</p>
+
+    <main>
+        <h2>시리즈</h2>
+        <table>
+            <thead>
+                <tr><th>코드</th><th>시리즈</th><th>설명</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><code>CT</code></td><td>회로이론</td><td>회로이론 기초 시리즈 (EP00~EP08)</td></tr>
+                <tr><td><code>SIM</code></td><td>시뮬레이션</td><td>LTSpice, MATLAB 시뮬레이션 실습</td></tr>
+                <tr><td><code>LAB</code></td><td>실습</td><td>ESP32, 아두이노, LabVIEW 프로젝트</td></tr>
+            </tbody>
+        </table>
+
+        <h2>교재 목록</h2>
+        <ul>
+            <li><a href="CT/EP00-why-circuit-theory-is-hard/">EP00: 회로이론이 어려운 진짜 이유</a></li>
+            <li><a href="CT/EP01-imaginary-j-is-rotation/">EP01: 허수 j의 정체 — 회전이다!</a></li>
+        </ul>
+    </main>
+
+    <footer>
+        <a href="https://youtube.com/@jongijonja">YouTube</a>
+        <a href="https://blog.professor-kim.com/wordpress/">블로그</a>
+    </footer>
+</body>
+</html>
