@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>존기존자 EP01 — 오일러 공식 인터랙티브 교재</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#1A1A2E;color:#fff;font-family:'Noto Sans KR',sans-serif;display:flex;flex-direction:column;align-items:center;padding:30px;min-height:100vh;}
+  h1{color:#E94560;font-size:26px;margin-bottom:4px;}
+  .sub{color:rgba(255,255,255,0.5);font-size:13px;margin-bottom:20px;}
+  .main{display:flex;gap:30px;flex-wrap:wrap;justify-content:center;}
+  canvas{border-radius:12px;background:#0F1B2D;}
+  .panel{background:#0F1B2D;border-radius:12px;padding:24px;width:340px;}
+  .panel h2{color:#E94560;font-size:18px;margin-bottom:16px;}
+  .slider-group{margin-bottom:20px;}
+  .slider-label{display:flex;justify-content:space-between;margin-bottom:6px;font-size:14px;}
+  .slider-val{color:#E94560;font-weight:700;font-size:18px;}
+  input[type=range]{width:100%;accent-color:#E94560;height:6px;}
+  .values{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+  .val-box{background:rgba(255,255,255,0.05);border-radius:8px;padding:12px;text-align:center;}
+  .val-label{font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;}
+  .val-num{font-size:22px;font-weight:700;}
+  .val-num.re{color:#4FC3F7;}
+  .val-num.im{color:#E94560;}
+  .formula-box{background:rgba(233,69,96,0.1);border:1px solid rgba(233,69,96,0.3);border-radius:10px;padding:16px;text-align:center;margin-bottom:16px;}
+  .formula{font-size:20px;font-weight:700;letter-spacing:1px;}
+  .principle-box{background:rgba(15,52,96,0.3);border-left:4px solid #0F3460;border-radius:0 8px 8px 0;padding:12px 16px;margin-top:16px;}
+  .principle-title{color:#4FC3F7;font-size:13px;font-weight:700;margin-bottom:4px;}
+  .principle-text{color:rgba(255,255,255,0.6);font-size:12px;line-height:1.5;}
+  .btn-row{display:flex;gap:8px;margin-bottom:16px;}
+  button{background:#E94560;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;flex:1;}
+  button:hover{background:#d63751;}
+  button.sec{background:#0F3460;}
+  .footer{margin-top:24px;color:rgba(255,255,255,0.3);font-size:12px;text-align:center;}
+  .footer a{color:#E94560;text-decoration:none;}
+</style>
+</head>
+<body>
+<h1>e<sup>jθ</sup> = cosθ + j·sinθ</h1>
+<div class="sub">존기존자 EP01 | 오일러 공식 인터랙티브 교재</div>
+
+<div class="main">
+  <canvas id="c" width="500" height="500"></canvas>
+  <div class="panel">
+    <h2>θ (각도) 조절</h2>
+    <div class="slider-group">
+      <div class="slider-label">
+        <span>0°</span>
+        <span class="slider-val" id="angleDisplay">45°</span>
+        <span>360°</span>
+      </div>
+      <input type="range" id="angleSlider" min="0" max="360" value="45" step="1">
+    </div>
+    
+    <div class="btn-row">
+      <button onclick="setAngle(0)">0°</button>
+      <button onclick="setAngle(90)">90°</button>
+      <button onclick="setAngle(180)">180°</button>
+      <button onclick="setAngle(270)">270°</button>
+    </div>
+    <div class="btn-row">
+      <button class="sec" onclick="autoRotate()">▶ 자동 회전</button>
+      <button class="sec" onclick="stopRotate()">⏹ 정지</button>
+    </div>
+    
+    <div class="formula-box">
+      <div class="formula" id="formulaText">e<sup>j45°</sup> = 0.707 + j·0.707</div>
+    </div>
+    
+    <div class="values">
+      <div class="val-box">
+        <div class="val-label">cosθ (실수부)</div>
+        <div class="val-num re" id="cosVal">0.707</div>
+      </div>
+      <div class="val-box">
+        <div class="val-label">sinθ (허수부)</div>
+        <div class="val-num im" id="sinVal">0.707</div>
+      </div>
+      <div class="val-box">
+        <div class="val-label">크기 |e<sup>jθ</sup>|</div>
+        <div class="val-num" style="color:#81C784;" id="magVal">1.000</div>
+      </div>
+      <div class="val-box">
+        <div class="val-label">각도 θ</div>
+        <div class="val-num" style="color:#FFB74D;" id="degVal">45°</div>
+      </div>
+    </div>
+    
+    <div class="principle-box">
+      <div class="principle-title">존기존자의 3대 원칙으로 보면</div>
+      <div class="principle-text">
+        ① <b>자연이 먼저:</b> 시계바늘이 돌아간다. 모터가 돌아간다.<br>
+        ② <b>법칙은 불변:</b> 회전은 자연에 이미 있는 것이다.<br>
+        ③ <b>수학은 표현:</b> 그걸 수식으로 쓰면 e<sup>jθ</sup> = cosθ + j·sinθ
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <a href="https://youtube.com/@jongijonja">존기존자 YouTube</a> · 
+  <a href="https://blog.professor-kim.com/wordpress/">블로그</a> · 
+  <a href="https://github.com/jinsunkim60/jongijonja-materials">GitHub</a>
+</div>
+
+<script>
+const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+const W=500,H=500,CX=W/2,CY=H/2,R=180;
+const slider=document.getElementById('angleSlider');
+let angle=45;
+let autoTimer=null;
+let trailAngles=[];
+
+slider.addEventListener('input',e=>{
+  angle=parseInt(e.target.value);
+  trailAngles=[];
+  updateDisplay();
+});
+
+function setAngle(a){
+  angle=a;slider.value=a;trailAngles=[];updateDisplay();
+}
+
+function autoRotate(){
+  if(autoTimer)return;
+  trailAngles=[];
+  autoTimer=setInterval(()=>{
+    angle=(angle+1)%361;
+    slider.value=angle;
+    trailAngles.push(angle);
+    if(trailAngles.length>360)trailAngles.shift();
+    updateDisplay();
+  },30);
+}
+function stopRotate(){if(autoTimer){clearInterval(autoTimer);autoTimer=null;}}
+
+function updateDisplay(){
+  const rad=angle*Math.PI/180;
+  const cosV=Math.cos(rad), sinV=Math.sin(rad);
+  
+  document.getElementById('angleDisplay').textContent=angle+'°';
+  document.getElementById('cosVal').textContent=cosV.toFixed(3);
+  document.getElementById('sinVal').textContent=sinV.toFixed(3);
+  document.getElementById('magVal').textContent='1.000';
+  document.getElementById('degVal').textContent=angle+'°';
+  
+  const cosStr=cosV.toFixed(3), sinStr=sinV>=0?sinV.toFixed(3):sinV.toFixed(3);
+  const sign=sinV>=0?'+':'';
+  document.getElementById('formulaText').innerHTML=
+    `e<sup>j${angle}°</sup> = ${cosStr} ${sign} j·${Math.abs(sinV).toFixed(3)}`;
+}
+
+function drawAxes(){
+  ctx.strokeStyle='rgba(255,255,255,0.12)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(20,CY);ctx.lineTo(W-20,CY);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(CX,20);ctx.lineTo(CX,H-20);ctx.stroke();
+  
+  ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='13px Noto Sans KR';ctx.textAlign='center';
+  ctx.fillText('Re',W-30,CY-8);
+  ctx.fillText('Im',CX+16,30);
+  
+  // 단위원
+  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.arc(CX,CY,R,0,Math.PI*2);ctx.stroke();
+  
+  // 눈금
+  [0,90,180,270].forEach(a=>{
+    const rad2=-a*Math.PI/180;
+    const x=CX+Math.cos(rad2)*R, y=CY+Math.sin(rad2)*R;
+    ctx.fillStyle='rgba(255,255,255,0.2)';
+    ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill();
+  });
+  ctx.font='bold 14px Noto Sans KR';
+  ctx.fillStyle='rgba(255,255,255,0.3)';
+  ctx.fillText('1',CX+R+14,CY+4);
+  ctx.fillText('-1',CX-R-16,CY+4);
+  ctx.fillText('j',CX+10,CY-R-6);
+  ctx.fillText('-j',CX+12,CY+R+16);
+}
+
+function drawPhasor(){
+  const rad=-angle*Math.PI/180;
+  const cosV=Math.cos(rad),sinV=Math.sin(rad);
+  const ex=CX+cosV*R, ey=CY+sinV*R;
+  
+  // cosθ 수평선 (실수부)
+  ctx.strokeStyle='rgba(79,195,247,0.5)';ctx.lineWidth=2;ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(ex,CY);ctx.lineTo(ex,ey);ctx.stroke();
+  ctx.setLineDash([]);
+  // cosθ 표시
+  ctx.fillStyle='#4FC3F7';ctx.font='bold 13px Noto Sans KR';ctx.textAlign='center';
+  ctx.fillText('cosθ',CX+(cosV*R)/2, CY+20);
+  ctx.strokeStyle='#4FC3F7';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(CX,CY);ctx.lineTo(ex,CY);ctx.stroke();
+  
+  // sinθ 수직선 (허수부)
+  ctx.strokeStyle='rgba(233,69,96,0.5)';ctx.lineWidth=2;ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(CX,ey);ctx.lineTo(ex,ey);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#E94560';ctx.font='bold 13px Noto Sans KR';
+  ctx.fillText('j·sinθ',CX-35, CY+(-sinV*R)/2);
+  ctx.strokeStyle='#E94560';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(CX,CY);ctx.lineTo(CX,ey);ctx.stroke();
+  
+  // 각도 호
+  ctx.strokeStyle='rgba(255,183,77,0.6)';ctx.lineWidth=2;
+  ctx.beginPath();
+  const arcR=40;
+  if(angle>0){
+    ctx.arc(CX,CY,arcR,0,-angle*Math.PI/180,true);
+    ctx.stroke();
+  }
+  // θ 라벨
+  if(angle>15){
+    const midRad=-(angle/2)*Math.PI/180;
+    ctx.fillStyle='#FFB74D';ctx.font='bold 14px Noto Sans KR';
+    ctx.fillText('θ',CX+Math.cos(midRad)*55,CY+Math.sin(midRad)*55+4);
+  }
+  
+  // 메인 벡터 (phasor)
+  ctx.strokeStyle='#fff';ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(CX,CY);ctx.lineTo(ex,ey);ctx.stroke();
+  
+  // 화살촉
+  const aLen=14,aAng=0.35;
+  const dx=ex-CX,dy=ey-CY;
+  const len=Math.sqrt(dx*dx+dy*dy);
+  const ux=dx/len,uy=dy/len;
+  ctx.beginPath();
+  ctx.moveTo(ex,ey);
+  ctx.lineTo(ex-aLen*(ux*Math.cos(aAng)-uy*Math.sin(aAng)),ey-aLen*(uy*Math.cos(aAng)+ux*Math.sin(aAng)));
+  ctx.moveTo(ex,ey);
+  ctx.lineTo(ex-aLen*(ux*Math.cos(-aAng)-uy*Math.sin(-aAng)),ey-aLen*(uy*Math.cos(-aAng)+ux*Math.sin(-aAng)));
+  ctx.stroke();
+  
+  // 끝점
+  ctx.fillStyle='#fff';
+  ctx.beginPath();ctx.arc(ex,ey,6,0,Math.PI*2);ctx.fill();
+  
+  // e^jθ 라벨
+  ctx.fillStyle='#fff';ctx.font='bold 16px Noto Sans KR';
+  const lx=CX+cosV*R*1.14, ly=CY+sinV*R*1.14;
+  ctx.fillText('e^jθ',lx,ly+5);
+}
+
+function drawTrail(){
+  if(trailAngles.length<2)return;
+  ctx.strokeStyle='rgba(233,69,96,0.15)';ctx.lineWidth=2;
+  ctx.beginPath();
+  trailAngles.forEach((a,i)=>{
+    const rad2=-a*Math.PI/180;
+    const x=CX+Math.cos(rad2)*R,y=CY+Math.sin(rad2)*R;
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+}
+
+function drawSineWave(){
+  // 하단에 작은 사인파
+  const waveY=H-30;
+  const waveH=25;
+  ctx.strokeStyle='rgba(233,69,96,0.3)';ctx.lineWidth=1;
+  ctx.beginPath();
+  for(let x=30;x<W-30;x++){
+    const t=(x-30)/(W-60)*2*Math.PI;
+    const y=waveY-Math.sin(t)*waveH;
+    if(x===30)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+  
+  // 현재 위치 표시
+  const curX=30+(angle/360)*(W-60);
+  const curY=waveY-Math.sin(angle*Math.PI/180)*waveH;
+  ctx.fillStyle='#E94560';
+  ctx.beginPath();ctx.arc(curX,curY,4,0,Math.PI*2);ctx.fill();
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  drawAxes();
+  drawTrail();
+  drawPhasor();
+  drawSineWave();
+  requestAnimationFrame(draw);
+}
+
+updateDisplay();
+draw();
+</script>
+</body>
+</html>

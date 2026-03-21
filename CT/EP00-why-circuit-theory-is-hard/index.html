@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>존기존자 EP00 — KVL: 에너지 보존</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#1A1A2E; color:#fff; font-family:'Noto Sans KR',sans-serif; display:flex; flex-direction:column; align-items:center; min-height:100vh; padding:30px; }
+  h1 { color:#E94560; font-size:28px; margin-bottom:8px; }
+  .subtitle { color:rgba(255,255,255,0.5); font-size:14px; margin-bottom:30px; }
+  canvas { border-radius:12px; background:#0F1B2D; }
+  .controls { margin-top:20px; display:flex; gap:15px; align-items:center; }
+  button { background:#E94560; color:#fff; border:none; padding:10px 24px; border-radius:8px; font-size:16px; font-weight:700; cursor:pointer; font-family:'Noto Sans KR',sans-serif; }
+  button:hover { background:#d63751; }
+  .info { margin-top:20px; max-width:800px; text-align:center; }
+  .principle { color:#E94560; font-weight:700; font-size:18px; margin-top:15px; }
+  .explain { color:rgba(255,255,255,0.7); font-size:15px; margin-top:8px; line-height:1.6; }
+  .formula { color:#fff; font-size:32px; font-weight:900; margin-top:20px; letter-spacing:2px; }
+</style>
+</head>
+<body>
+<h1>KVL — 에너지 보존</h1>
+<div class="subtitle">존기존자 EP00 | 자연이 먼저다</div>
+<canvas id="c" width="800" height="500"></canvas>
+<div class="controls">
+  <button onclick="startAnim()">▶ 물 흘려보내기</button>
+  <button onclick="resetAnim()">↺ 리셋</button>
+</div>
+<div class="info">
+  <div class="principle">자연현상: 물은 높은 곳에서 내려옵니다. 다시 올라가지 않습니다.</div>
+  <div class="explain">이해: 에너지 보존입니다. 끝.</div>
+  <div class="formula">표현: ΣV = 0 — 그게 KVL입니다.</div>
+  <div class="explain" style="margin-top:12px; color:rgba(255,255,255,0.4);">이 한 문장을 교과서는 30페이지에 걸쳐 써놨습니다.</div>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const W = 800, H = 500;
+
+// 회로 경로 (물 파이프 형태)
+const pipeTop = 80;
+const pipeBot = 380;
+const pipeLeft = 100;
+const pipeRight = 700;
+const pipeW = 40;
+
+// 물방울들
+let drops = [];
+let animating = false;
+let phase = 0; // 0: idle, 1: falling left, 2: bottom, 3: right side
+
+// 저항 위치
+const resistors = [
+  { x: 300, y: pipeBot, label: 'R₁', v: '3V' },
+  { x: 500, y: pipeBot, label: 'R₂', v: '2V' },
+];
+const battery = { x: pipeLeft, y: (pipeTop+pipeBot)/2, label: '전지', v: '5V' };
+
+function drawPipe() {
+  ctx.strokeStyle = '#2a3f5f';
+  ctx.lineWidth = pipeW;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  // 위 → 좌하 → 아래 → 우 → 우상 → 위
+  ctx.moveTo(pipeLeft, pipeTop);
+  ctx.lineTo(pipeLeft, pipeBot);
+  ctx.lineTo(pipeRight, pipeBot);
+  ctx.lineTo(pipeRight, pipeTop);
+  ctx.lineTo(pipeLeft, pipeTop);
+  ctx.stroke();
+  
+  // 내부
+  ctx.strokeStyle = '#1a2a44';
+  ctx.lineWidth = pipeW - 8;
+  ctx.beginPath();
+  ctx.moveTo(pipeLeft, pipeTop);
+  ctx.lineTo(pipeLeft, pipeBot);
+  ctx.lineTo(pipeRight, pipeBot);
+  ctx.lineTo(pipeRight, pipeTop);
+  ctx.lineTo(pipeLeft, pipeTop);
+  ctx.stroke();
+}
+
+function drawBattery() {
+  const bx = pipeLeft, by = (pipeTop+pipeBot)/2;
+  // 펌프 아이콘
+  ctx.fillStyle = '#E94560';
+  ctx.beginPath();
+  ctx.arc(bx, by, 28, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.font = '14px Noto Sans KR';
+  ctx.textAlign = 'center';
+  ctx.fillText('펌프', bx, by-2);
+  ctx.fillText('+5V', bx, by+14);
+  
+  // 화살표 (위로)
+  ctx.strokeStyle = '#E94560';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(bx, by-35);
+  ctx.lineTo(bx, by-55);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(bx-6, by-48);
+  ctx.lineTo(bx, by-55);
+  ctx.lineTo(bx+6, by-48);
+  ctx.stroke();
+  
+  // "높이 올림" 텍스트
+  ctx.fillStyle = 'rgba(233,69,96,0.7)';
+  ctx.font = '12px Noto Sans KR';
+  ctx.fillText('에너지 공급', bx+50, by);
+}
+
+function drawResistors() {
+  resistors.forEach(r => {
+    ctx.fillStyle = '#0F3460';
+    ctx.fillRect(r.x-25, r.y-pipeW/2-5, 50, pipeW+10);
+    ctx.strokeStyle = '#4a6fa5';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(r.x-25, r.y-pipeW/2-5, 50, pipeW+10);
+    
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 14px Noto Sans KR';
+    ctx.textAlign = 'center';
+    ctx.fillText(r.label, r.x, r.y-2);
+    ctx.fillStyle = '#E94560';
+    ctx.font = '12px Noto Sans KR';
+    ctx.fillText('-'+r.v, r.x, r.y+14);
+  });
+}
+
+function drawHeightIndicator() {
+  // 높이 표시
+  const hx = 50;
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath();
+  ctx.moveTo(hx, pipeTop);
+  ctx.lineTo(pipeLeft-5, pipeTop);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(hx, pipeBot);
+  ctx.lineTo(pipeLeft-5, pipeBot);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  
+  // 화살표
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(hx, pipeTop+10);
+  ctx.lineTo(hx, pipeBot-10);
+  ctx.stroke();
+  
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = '13px Noto Sans KR';
+  ctx.textAlign = 'center';
+  ctx.save();
+  ctx.translate(hx-15, (pipeTop+pipeBot)/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillText('높이 = 전압', 0, 0);
+  ctx.restore();
+  
+  ctx.fillStyle = '#E94560';
+  ctx.font = 'bold 13px Noto Sans KR';
+  ctx.textAlign = 'left';
+  ctx.fillText('높음 (+5V)', pipeLeft+10, pipeTop-10);
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.fillText('낮음 (0V)', pipeRight-60, pipeBot+30);
+}
+
+function drawLabels() {
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = '12px Noto Sans KR';
+  ctx.textAlign = 'center';
+  ctx.fillText('전류 흐름 방향 →', (pipeLeft+pipeRight)/2, pipeTop-15);
+  ctx.fillText('전류 흐름 방향 →', (pipeLeft+pipeRight)/2, pipeBot+30);
+}
+
+class Drop {
+  constructor(delay) {
+    this.delay = delay;
+    this.t = -delay;
+    this.path = this.buildPath();
+    this.idx = 0;
+    this.x = this.path[0].x;
+    this.y = this.path[0].y;
+    this.done = false;
+  }
+  buildPath() {
+    const pts = [];
+    const steps = 300;
+    // Top: left to right
+    for(let i=0;i<=steps/4;i++) { pts.push({x: pipeLeft+(pipeRight-pipeLeft)*(i/(steps/4)), y:pipeTop}); }
+    // Right: top to bottom
+    for(let i=0;i<=steps/4;i++) { pts.push({x: pipeRight, y:pipeTop+(pipeBot-pipeTop)*(i/(steps/4))}); }
+    // Bottom: right to left
+    for(let i=0;i<=steps/4;i++) { pts.push({x: pipeRight-(pipeRight-pipeLeft)*(i/(steps/4)), y:pipeBot}); }
+    // Left: bottom to top
+    for(let i=0;i<=steps/4;i++) { pts.push({x: pipeLeft, y:pipeBot-(pipeBot-pipeTop)*(i/(steps/4))}); }
+    return pts;
+  }
+  update() {
+    this.t++;
+    if(this.t < 0) return;
+    if(this.idx < this.path.length-1) this.idx++;
+    else this.idx = 0; // loop
+    this.x = this.path[this.idx].x;
+    this.y = this.path[this.idx].y;
+  }
+  draw() {
+    if(this.t < 0) return;
+    const alpha = 0.9;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 6, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(100,180,255,${alpha})`;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(this.x-1, this.y-1, 2, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(200,230,255,${alpha})`;
+    ctx.fill();
+  }
+}
+
+function startAnim() {
+  if(animating) return;
+  animating = true;
+  drops = [];
+  for(let i=0; i<12; i++) {
+    drops.push(new Drop(i*25));
+  }
+}
+
+function resetAnim() {
+  animating = false;
+  drops = [];
+}
+
+function draw() {
+  ctx.clearRect(0,0,W,H);
+  
+  drawPipe();
+  drawBattery();
+  drawResistors();
+  drawHeightIndicator();
+  drawLabels();
+  
+  if(animating) {
+    drops.forEach(d => { d.update(); d.draw(); });
+  }
+  
+  // KVL 공식
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.font = 'bold 20px Noto Sans KR';
+  ctx.textAlign = 'right';
+  ctx.fillText('+5V - 3V - 2V = 0  ✓', W-30, H-20);
+  
+  requestAnimationFrame(draw);
+}
+
+draw();
+</script>
+</body>
+</html>
